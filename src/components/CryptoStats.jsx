@@ -13,11 +13,12 @@ const CryptoStats = () => {
     setError('');
     try {
       // Fetch general stats
-      const statsResponse = await axios.get(import.meta.env.URL+`/api/stats?coin=${coin}`);
+      const statsResponse = await axios.get(`${import.meta.env.VITE_URL}/stats?coin=${coin}`);
       setCryptoStats(statsResponse.data);
 
       // Fetch price deviation
-      const deviationResponse = await axios.get(import.meta.env.URL+`/api/deviation?coin=${coin}`);
+      const deviationResponse = await axios.get(`${import.meta.env.VITE_URL}/deviation?coin=${coin}`);
+
       setDeviation(deviationResponse.data.deviation);
     } catch (err) {
       setError('Error fetching crypto data. Please try again.');
