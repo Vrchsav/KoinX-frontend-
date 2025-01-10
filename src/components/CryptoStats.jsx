@@ -2,22 +2,23 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const CryptoStats = () => {
-  const [coin, setCoin] = useState('');
+  const [coin, setCoin] = useState('bitcoin');
   const [cryptoStats, setCryptoStats] = useState(null);
+  const [deviation, setDeviation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleFetchStats = async () => {
-    if (!coin) {
-      setError('Please enter a valid cryptocurrency name.');
-      return;
-    }
-
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:4000/api/stats?coin=${coin}`);
-      setCryptoStats(response.data);
+      // Fetch general stats
+      const statsResponse = await axios.get(`http://localhost:4000/api/stats?coin=${coin}`);
+      setCryptoStats(statsResponse.data);
+
+      // Fetch price deviation
+      const deviationResponse = await axios.get(`http://localhost:4000/api/deviation?coin=${coin}`);
+      setDeviation(deviationResponse.data.deviation);
     } catch (err) {
       setError('Error fetching crypto data. Please try again.');
       console.error(err);
@@ -28,15 +29,21 @@ const CryptoStats = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Get Cryptocurrency Stats</h1>
+      <h1 className="text-2xl font-semibold mb-4">Cryptocurrency Stats & Deviation</h1>
       <div className="mb-4">
-        <input
-          type="text"
+        <label htmlFor="coin" className="block text-lg font-medium mb-2">
+          Select a cryptocurrency:
+        </label>
+        <select
+          id="coin"
           value={coin}
-          onChange={(e) => setCoin(e.target.value.toLowerCase())}
-          placeholder="Enter coin name (bitcoin, ethereum, matic-network)"
+          onChange={(e) => setCoin(e.target.value)}
           className="p-2 border border-gray-300 rounded"
-        />
+        >
+          <option value="bitcoin">Bitcoin</option>
+          <option value="ethereum">Ethereum</option>
+          <option value="matic-network">Matic</option>
+        </select>
         <button
           onClick={handleFetchStats}
           className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
@@ -67,6 +74,13 @@ const CryptoStats = () => {
               </tr>
             </tbody>
           </table>
+        </div>
+      )}
+
+      {deviation !== null && (
+        <div className="mt-4">
+          <h2 className="text-xl font-semibold">Price Deviation</h2>
+          <p className="mt-2 text-lg">Standard Deviation (last 100 records): ${deviation.toFixed(2)}</p>
         </div>
       )}
     </div>
